@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: changes/2021/07/20-01-changelog.xml
+      relativeToChangelogFile: true
+  - include:
+      file: changes/init-1.yaml
+      relativeToChangelogFile: true

@@ -1,0 +1,27 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/auto_sale?serverTimezone=UTC
+  liquibase:
+    change-log: liquibase/db.changelog-master.yaml
+
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            clientId: 804471670901-q6t4rhcb8f161jeus6m70s7v8i6m71kr.apps.googleusercontent.com
+#            clientSecret: wSqfNzNiTXH-UE43cBFbZmIM
+#            accessTokenUri: https://www.googleapis.com/oauth2/v3/token
+#            userAuthorizationUri: https://accounts.google.com/o/oauth2/auth
+#            tokenName: oauth_token
+#            authenticationScheme: query
+#            clientAuthenticationScheme: form
+#            scope: profile email
+#            resource:
+#              userInfoUri: https://www.googleapis.com/oauth2/v2/me
+#              preferTokenInfo: false
