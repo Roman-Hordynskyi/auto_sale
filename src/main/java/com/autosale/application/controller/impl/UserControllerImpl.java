@@ -30,10 +30,8 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<List<UserDTO>> getUserById(Long userId) {
-        return ResponseEntity.ok(userService.getAllUsers().stream()
-                .map(user -> mapper.map(user, UserDTO.class))
-                .collect(Collectors.toList()));
+    public ResponseEntity<UserDTO> getUserById(Long userId) {
+        return ResponseEntity.ok(mapper.map(userService.getUserById(userId), UserDTO.class));
     }
 
     @Override

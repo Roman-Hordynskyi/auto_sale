@@ -14,7 +14,7 @@ public interface UserController {
     ResponseEntity<List<UserDTO>> getUsers();
 
     @GetMapping("/{userId}")
-    ResponseEntity<List<UserDTO>> getUserById(@PathVariable Long userId);
+    ResponseEntity<UserDTO> getUserById(@PathVariable Long userId);
 
     @PostMapping
     ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO);

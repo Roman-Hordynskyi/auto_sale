@@ -4,6 +4,7 @@ import com.autosale.application.model.domain.User;
 import com.autosale.application.model.enums.Status;
 import com.autosale.application.repository.UserRepository;
 import com.autosale.application.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
