@@ -19,7 +19,6 @@ logging:
         boot:
           autoconfigure: error
 
-
 #  security:
 #    oauth2:
 #      client:
