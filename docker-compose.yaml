@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:latest
+    container_name: db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    restart: always
+    ports:
+    - 3307:3306
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - auto-sale-net
+
+  auto-sale-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: auto-sale
+    container_name: auto-sale-api
+    depends_on:
+      - mysql-db2
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/auto_sale?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - auto-sale-net
+
+networks:
+  auto-sale-net:
