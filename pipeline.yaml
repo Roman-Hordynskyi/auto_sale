@@ -1,4 +1,20 @@
 AWSTemplateFormatVersion: 2010-09-09
+Description: CI/CD pipeline for auto_sale app
+
+Parameters:
+  GitHubOwner:
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9-]*"
+    Default: Roman-Hordynskyi
+  GitHubRepository:
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9_]*"
+    Default: auto_sale
+  GitHubBranch:
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9]*"
+    Default: main
+
 Resources:
   CodeBuildServiceRole:
     Type: 'AWS::IAM::Role'
@@ -52,7 +68,7 @@ Resources:
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Source:
         Type: GITHUB
-        Location: https://github.com/Roman-Hordynskyi/auto_sale.git
+        Location: !Sub 'https://github.com/${GitHubOwner}/${GitHubRepository}.git'
         GitCloneDepth: 1
         BuildSpec: buildspec.yaml
         ReportBuildStatus: true
@@ -69,7 +85,7 @@ Resources:
             - Type: HEAD_REF
               Pattern: ^refs/heads/.*
             - Type: BASE_REF
-              Pattern: !Sub "^refs/heads/main$"
+              Pattern: !Sub "^refs/heads/${GitHubBranch}"
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
