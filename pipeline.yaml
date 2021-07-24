@@ -93,6 +93,62 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:3.0
 
+  CodeBuildProjectDeployDev:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: !Sub '${AWS::StackName}-deploy-dev'
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: deployspec.yaml
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        EnvironmentVariables:
+          - Name: ENV_NAME
+            Type: PLAINTEXT
+            Value: dev
+
+  CodeBuildProjectDeployQa:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: !Sub '${AWS::StackName}-deploy-qa'
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: deployspec.yaml
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        EnvironmentVariables:
+          - Name: ENV_NAME
+            Type: PLAINTEXT
+            Value: qa
+
+  CodeBuildProjectDeployProd:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: !Sub '${AWS::StackName}-deploy-prod'
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: deployspec.yaml
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        EnvironmentVariables:
+          - Name: ENV_NAME
+            Type: PLAINTEXT
+            Value: prod
 
   ## CodePipeline Pipelines ##
 
@@ -189,7 +245,6 @@ Resources:
                 Repo: !Ref GitHubRepository
                 PollForSourceChanges: false
                 OAuthToken: "{{resolve:secretsmanager:GITHUB_ACCESS:SecretString:GIT_HUB_ACCESS_TOKEN}}"
-              RunOrder: 1
         - Name: Build
           Actions:
             - Name: Build
@@ -204,4 +259,51 @@ Resources:
                 ProjectName: !Ref CodeBuildProject
               OutputArtifacts:
                 - Name: BuildOutput
-              RunOrder: 1
+
+        - Name: Dev
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+                InputArtifacts:
+                  - Name: BuildOutput
+                Configuration:
+                  ProjectName: !Ref CodeBuildProjectDeployDev
+
+            - Name: Qa
+              Actions:
+                - Name: Deploy
+                  RunOrder: 1
+                  ActionTypeId:
+                    Category: Build
+                    Owner: AWS
+                    Provider: CodeBuild
+                    Version: "1"
+                    InputArtifacts:
+                      - Name: BuildOutput
+                    Configuration:
+                      ProjectName: !Ref CodeBuildProjectDeployQa
+                - Name: Approval
+                  RunOrder: 2
+                  ActionTypeId:
+                    Owner: AWS
+                    Provider: Manual
+                    Version: "1"
+                    Configuration:
+                      ProjectName: Approve or Reject this after running tests
+
+            - Name: Prod
+              Actions:
+                - Name: Deploy
+                  ActionTypeId:
+                    Category: Build
+                    Owner: AWS
+                    Provider: CodeBuild
+                    Version: "1"
+                    InputArtifacts:
+                      - Name: BuildOutput
+                    Configuration:
+                      ProjectName: !Ref CodeBuildProjectDeployProd
