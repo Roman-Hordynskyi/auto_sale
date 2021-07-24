@@ -159,6 +159,20 @@ Resources:
                   - 'codebuild:BatchGetBuilds'
                   - 'codebuild:StartBuild'
                 Resource: "*"
+              - Sid: CodeBuildAccessPolicy
+                Effect: Allow
+                Action:
+                  - 'codebuild:*'
+                  - 'iam:PassRole'
+                Resource: '*'
+              - Sid: S3AccessPolicy
+                Effect: Allow
+                Action:
+                  - 's3:CreateBucket'
+                  - 's3:GetObject'
+                  - 's3:List*'
+                  - 's3:PutObject'
+                Resource: '*'
 
   CodePipelineArtifactStore:
     Type: AWS::S3::Bucket
@@ -221,6 +235,7 @@ Resources:
                 ProjectName: !Ref CodeBuildProject
               OutputArtifacts:
                 - Name: BuildOutput
+                - Name: DeploymentArtifacts
         - Name: Deploy
           Actions:
             - Name: Deploy
@@ -229,8 +244,7 @@ Resources:
                 Owner: AWS
                 Provider: CodeBuild
                 Version: "1"
-              InputArtifacts:
-                - Name: BuildOutput
               Configuration:
                 ProjectName: !Ref CodeBuildProjectDeploy
-              RunOrder: 1
+              InputArtifacts:
+                - Name: DeploymentArtifacts
