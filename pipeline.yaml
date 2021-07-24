@@ -93,10 +93,10 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:3.0
 
-  CodeBuildProjectDeployDev:
+  CodeBuildProjectDeploy:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub ${AWS::StackName}-deploy-dev
+      Name: !Sub ${AWS::StackName}-deploy
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Artifacts:
         Type: CODEPIPELINE
@@ -108,44 +108,6 @@ Resources:
           - Name: ENV_NAME
             Type: PLAINTEXT
             Value: dev
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec: deployspec.yaml
-
-  CodeBuildProjectDeployQa:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: !Sub ${AWS::StackName}-deploy-qa
-      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:3.0
-        EnvironmentVariables:
-          - Name: ENV_NAME
-            Type: PLAINTEXT
-            Value: qa
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec: deployspec.yaml
-
-  CodeBuildProjectDeployProd:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: !Sub ${AWS::StackName}-deploy-prod
-      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:3.0
-        EnvironmentVariables:
-          - Name: ENV_NAME
-            Type: PLAINTEXT
-            Value: prod
       Source:
         Type: CODEPIPELINE
         BuildSpec: deployspec.yaml
@@ -259,8 +221,7 @@ Resources:
                 ProjectName: !Ref CodeBuildProject
               OutputArtifacts:
                 - Name: BuildOutput
-
-        - Name: Dev
+        - Name: Deploy
           Actions:
             - Name: Deploy
               ActionTypeId:
@@ -271,41 +232,5 @@ Resources:
               InputArtifacts:
                 - Name: BuildOutput
               Configuration:
-                ProjectName: !Ref CodeBuildProjectDeployDev
-              RunOrder: 1
-
-        - Name: Qa
-          Actions:
-            - Name: Deploy
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: "1"
-              InputArtifacts:
-                - Name: BuildOutput
-              Configuration:
-                ProjectName: !Ref CodeBuildProjectDeployQa
-              RunOrder: 1
-#            - Name: Approval
-#              RunOrder: 2
-#              ActionTypeId:
-#                Owner: AWS
-#                Provider: Manual
-#                Version: "1"
-#              Configuration:
-#                CustomData: Approve or Reject this after running tests
-
-        - Name: Prod
-          Actions:
-            - Name: Deploy
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: "1"
-              InputArtifacts:
-                - Name: BuildOutput
-              Configuration:
-                ProjectName: !Ref CodeBuildProjectDeployProd
+                ProjectName: !Ref CodeBuildProjectDeploy
               RunOrder: 1
