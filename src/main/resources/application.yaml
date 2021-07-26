@@ -2,22 +2,48 @@ server:
   port: 8080
 
 spring:
+#  profiles:
+#    active: local
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: root
-    url: jdbc:mysql://localhost:3306/auto_sale?characterEncoding=utf8&createDatabaseIfNotExist=true&serverTimezone=UTC
+    password: password
+    url: jdbc:mysql://aamphn2i2rrhgw.cp9iagwfbcu2.us-east-1.rds.amazonaws.com/ebdb
+    driver-class-name: com.mysql.cj.jdbc.Driver
   liquibase:
     change-log: liquibase/db.changelog-master.yaml
   application:
     name: auto-sale
-
 logging:
   level:
     org:
       springframework:
+        security: INFO
         boot:
           autoconfigure: error
+
+---
+
+#spring:
+#  profiles: local
+#  datasource:
+#    username: root
+#    password: root
+#    url: jdbc:mysql://localhost:3306/auto-sale?characterEncoding=utf8&createDatabaseIfNotExist=true&serverTimezone=UTC
+#  liquibase:
+#    contexts: local
+
+#---
+#
+#spring:
+#  profiles: ${spring.profiles.active}
+#  datasource:
+#    username: root
+#    password: password
+#    url: jdbc:mysql://aaf447vj4ci30n.cp9iagwfbcu2.us-east-1.rds.amazonaws.com/ebdb
+#  liquibase:
+#    contexts: dev
+#
+#---
 
 #  security:
 #    oauth2:

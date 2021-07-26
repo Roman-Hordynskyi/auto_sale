@@ -14,6 +14,9 @@ Parameters:
     Type: String
     AllowedPattern: "[a-zA-Z0-9]*"
     Default: main
+  ArtifactsBucketName:
+    Type: String
+    Default: auto-sale-codepipeline-artifacts
 
 Resources:
   CodeBuildServiceRole:
@@ -97,7 +100,9 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Sub ${AWS::StackName}-deploy
-      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      ServiceRole: !GetAtt
+        - CodeBuildServiceRole
+        - Arn
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -139,6 +144,7 @@ Resources:
               - Sid: S3GetObjectPolicy
                 Effect: Allow
                 Action:
+                  - 's3:PutObject'
                   - 's3:GetObject'
                   - 's3:GetObjectVersion'
                 Resource: '*'
@@ -235,7 +241,6 @@ Resources:
                 ProjectName: !Ref CodeBuildProject
               OutputArtifacts:
                 - Name: BuildOutput
-                - Name: DeploymentArtifacts
         - Name: Deploy
           Actions:
             - Name: Deploy
@@ -247,4 +252,4 @@ Resources:
               Configuration:
                 ProjectName: !Ref CodeBuildProjectDeploy
               InputArtifacts:
-                - Name: DeploymentArtifacts
+                - Name: BuildOutput
