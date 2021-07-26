@@ -7,7 +7,7 @@ spring:
   datasource:
     username: root
     password: password
-    url: jdbc:mysql://aamphn2i2rrhgw.cp9iagwfbcu2.us-east-1.rds.amazonaws.com/ebdb
+    url: jdbc:mysql://aa8sq2323q9x70.cp9iagwfbcu2.us-east-1.rds.amazonaws.com/ebdb
     driver-class-name: com.mysql.cj.jdbc.Driver
   liquibase:
     change-log: liquibase/db.changelog-master.yaml
