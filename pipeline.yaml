@@ -14,6 +14,9 @@ Parameters:
     Type: String
     AllowedPattern: "[a-zA-Z0-9]*"
     Default: main
+  ArtifactsBucketName:
+    Type: String
+    Default: auto-sale-codepipeline-artifacts
 
 Resources:
   CodeBuildServiceRole:
@@ -93,6 +96,26 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:3.0
 
+  CodeBuildProjectDeploy:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-deploy
+      ServiceRole: !GetAtt
+        - CodeBuildServiceRole
+        - Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        EnvironmentVariables:
+          - Name: ENV_NAME
+            Type: PLAINTEXT
+            Value: dev
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: deployspec.yaml
 
   ## CodePipeline Pipelines ##
 
@@ -121,6 +144,7 @@ Resources:
               - Sid: S3GetObjectPolicy
                 Effect: Allow
                 Action:
+                  - 's3:PutObject'
                   - 's3:GetObject'
                   - 's3:GetObjectVersion'
                 Resource: '*'
@@ -141,6 +165,20 @@ Resources:
                   - 'codebuild:BatchGetBuilds'
                   - 'codebuild:StartBuild'
                 Resource: "*"
+              - Sid: CodeBuildAccessPolicy
+                Effect: Allow
+                Action:
+                  - 'codebuild:*'
+                  - 'iam:PassRole'
+                Resource: '*'
+              - Sid: S3AccessPolicy
+                Effect: Allow
+                Action:
+                  - 's3:CreateBucket'
+                  - 's3:GetObject'
+                  - 's3:List*'
+                  - 's3:PutObject'
+                Resource: '*'
 
   CodePipelineArtifactStore:
     Type: AWS::S3::Bucket
@@ -189,7 +227,6 @@ Resources:
                 Repo: !Ref GitHubRepository
                 PollForSourceChanges: false
                 OAuthToken: "{{resolve:secretsmanager:GITHUB_ACCESS:SecretString:GIT_HUB_ACCESS_TOKEN}}"
-              RunOrder: 1
         - Name: Build
           Actions:
             - Name: Build
@@ -204,4 +241,15 @@ Resources:
                 ProjectName: !Ref CodeBuildProject
               OutputArtifacts:
                 - Name: BuildOutput
-              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref CodeBuildProjectDeploy
+              InputArtifacts:
+                - Name: BuildOutput
