@@ -9,7 +9,7 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.auto-sale</groupId>
-	<artifactId>application</artifactId>
+	<artifactId>application-v1</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
 	<name>application</name>
 
